@@ -1,0 +1,257 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+@import "./components/arc/foundation.css";
+
+/* ==========================================================================
+   KREW · Ivory OS
+   One set of semantic tokens drives Arc (unlayered), HeroUI (layered) and the
+   skecher / Planes components (shadcn names mapped in @theme below).
+   ========================================================================== */
+
+:root {
+  --font-geist: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-inter: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: var(--font-geist);
+  --font-body: var(--font-inter);
+
+  /* Neutral greys, no hue (pure monochrome) */
+  --ivory-0: oklch(100% 0 0);
+  --ivory-1: oklch(99.2% 0 0);
+  --ivory-2: oklch(98.4% 0 0);
+  --ivory-3: oklch(96.4% 0 0);
+  --ivory-4: oklch(92.6% 0 0);
+  --ivory-5: oklch(87% 0 0);
+  --ivory-6: oklch(74% 0 0);
+  --ivory-7: oklch(58% 0 0);
+  --ivory-8: oklch(45% 0 0);
+  --ivory-9: oklch(31% 0 0);
+  --ivory-10: oklch(21% 0 0);
+  --ivory-11: oklch(16% 0 0);
+
+  --background: var(--ivory-2);
+  --sidebar: var(--ivory-3);
+  --surface: var(--ivory-0);
+  --surface-raised: var(--ivory-0);
+  --surface-muted: var(--ivory-1);
+  --surface-sunken: var(--ivory-3);
+  --surface-inverse: var(--ivory-11);
+  --surface-inverse-2: oklch(22% 0 0);
+  --foreground: var(--ivory-11);
+  --text-secondary: var(--ivory-8);
+  --text-muted: var(--ivory-7);
+  --text-inverse: oklch(97% 0 0);
+  --text-inverse-muted: oklch(72% 0 0);
+  --border: oklch(91.8% 0 0);
+  --border-subtle: oklch(94.8% 0 0);
+  --border-strong: oklch(84% 0 0);
+  --accent: var(--ivory-11);
+  --accent-strong: oklch(10% 0 0);
+  --accent-subtle: oklch(16% 0 0 / 0.07);
+  --accent-foreground: var(--ivory-0);
+  --control-on: var(--ivory-11);
+  --control-fill: var(--ivory-11);
+
+  --success: oklch(52% 0.1 152);
+  --warning: oklch(64% 0.12 70);
+  --danger: oklch(55% 0.15 28);
+  --info: oklch(52% 0.08 250);
+  --success-soft: oklch(52% 0.1 152 / 0.1);
+  --warning-soft: oklch(64% 0.12 70 / 0.12);
+  --danger-soft: oklch(55% 0.15 28 / 0.1);
+
+  /* Monochrome chart series */
+  --series-1: var(--ivory-11);
+  --series-2: oklch(66% 0 0);
+  --series-3: oklch(82% 0 0);
+  --series-4: oklch(44% 0 0);
+
+  /* Restrained radii (Arc defaults are softer than Ivory OS wants) */
+  --radius-control: 0.625rem;
+  --radius-panel: 0.875rem;
+  --radius-surface: 1.125rem;
+
+  --shadow-resting: 0 1px 1.5px oklch(20% 0 0 / 0.04);
+  --shadow-raised: 0 1px 2px oklch(20% 0 0 / 0.04), 0 6px 16px oklch(20% 0 0 / 0.05);
+  --shadow-floating: 0 2px 6px oklch(20% 0 0 / 0.05), 0 22px 48px oklch(20% 0 0 / 0.12);
+
+  /* HeroUI semantic extras */
+  --overlay: var(--surface);
+  --overlay-foreground: var(--foreground);
+  --muted: var(--text-muted);
+  --default: var(--ivory-3);
+  --default-foreground: var(--foreground);
+  --field-background: var(--surface);
+  --field-foreground: var(--foreground);
+  --field-border: var(--border);
+  --surface-secondary: var(--ivory-3);
+  --surface-tertiary: var(--ivory-4);
+  --radius: 0.625rem;
+  --tooltip-delay: 250ms;
+  --tooltip-close-delay: 80ms;
+
+  /* Agent accents. Quiet, low chroma, swappable per agent in settings. */
+  --agent-luna: oklch(62% 0.07 295);
+  --agent-tracker: oklch(58% 0.07 160);
+  --agent-ivy: oklch(60% 0.08 128);
+  --agent-store: oklch(64% 0.08 72);
+  --agent-ads: oklch(60% 0.1 42);
+  --agent-retention: oklch(60% 0.08 12);
+  --agent-manager: oklch(21% 0 0);
+
+  --control-height-sm: 2rem;
+  --control-height-md: 2.375rem;
+  --control-height-lg: 2.75rem;
+
+  --sidebar-expanded: 264px;
+  --sidebar-collapsed: 60px;
+}
+
+:root[data-theme="dark"] {
+  --background: oklch(16.5% 0 0);
+  --sidebar: oklch(18.5% 0 0);
+  --surface: oklch(20.5% 0 0);
+  --surface-raised: oklch(23% 0 0);
+  --surface-muted: oklch(22% 0 0);
+  --surface-sunken: oklch(18% 0 0);
+  --surface-inverse: oklch(96% 0 0);
+  --surface-inverse-2: oklch(92% 0 0);
+  --foreground: oklch(95% 0 0);
+  --text-secondary: oklch(76% 0 0);
+  --text-muted: oklch(62% 0 0);
+  --text-inverse: oklch(18% 0 0);
+  --text-inverse-muted: oklch(42% 0 0);
+  --border: oklch(28% 0 0);
+  --border-subtle: oklch(24.5% 0 0);
+  --border-strong: oklch(38% 0 0);
+  --accent: oklch(95% 0 0);
+  --accent-strong: oklch(99% 0 0);
+  --accent-subtle: oklch(95% 0 0 / 0.1);
+  --accent-foreground: oklch(16% 0 0);
+  --control-on: oklch(93% 0 0);
+  --control-fill: oklch(70% 0 0);
+  --series-1: oklch(94% 0 0);
+  --series-2: oklch(64% 0 0);
+  --series-3: oklch(42% 0 0);
+  --series-4: oklch(78% 0 0);
+  --agent-manager: oklch(92% 0 0);
+  --default: oklch(26% 0 0);
+  --surface-secondary: oklch(25% 0 0);
+  --surface-tertiary: oklch(28% 0 0);
+}
+
+@theme inline {
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --color-canvas: var(--background);
+  --color-sidebar: var(--sidebar);
+  --color-panel: var(--surface);
+  --color-panel-muted: var(--surface-muted);
+  --color-sunken: var(--surface-sunken);
+  --color-inverse: var(--surface-inverse);
+  --color-inverse-2: var(--surface-inverse-2);
+  --color-ink: var(--foreground);
+  --color-ink-2: var(--text-secondary);
+  --color-ink-3: var(--text-muted);
+  --color-ink-inverse: var(--text-inverse);
+  --color-ink-inverse-2: var(--text-inverse-muted);
+  --color-line: var(--border);
+  --color-line-subtle: var(--border-subtle);
+  --color-line-strong: var(--border-strong);
+  --color-good: var(--success);
+  --color-warn: var(--warning);
+  --color-bad: var(--danger);
+  --color-good-soft: var(--success-soft);
+  --color-warn-soft: var(--warning-soft);
+  --color-bad-soft: var(--danger-soft);
+
+  /* shadcn names used by skecher-ui and Planes components */
+  --color-primary: var(--foreground);
+  --color-primary-foreground: var(--surface);
+  --color-muted-foreground: var(--text-muted);
+  --color-card: var(--surface);
+  --color-ring: var(--border-strong);
+  --color-input: var(--border);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--foreground);
+  --color-secondary: var(--surface-muted);
+  --color-secondary-foreground: var(--foreground);
+
+  --shadow-resting: var(--shadow-resting);
+  --shadow-raised: var(--shadow-raised);
+  --shadow-floating: var(--shadow-floating);
+}
+
+/* ---------- Base ---------- */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.45;
+  letter-spacing: -0.006em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+::selection {
+  background: oklch(16% 0 0 / 0.14);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+/* Diagonal hatch used by the Onbase-style charts and placeholders */
+.hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    currentColor 0 1.5px,
+    transparent 1.5px 5px
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Surfaces that stay ink-black in both themes (featured agent cards). */
+.always-dark {
+  --surface-inverse: oklch(17% 0 0);
+  --surface-inverse-2: oklch(22% 0 0);
+  --text-inverse: oklch(96% 0 0);
+  --text-inverse-muted: oklch(70% 0 0);
+}
