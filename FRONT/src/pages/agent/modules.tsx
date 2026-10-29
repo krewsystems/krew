@@ -1,19 +1,16 @@
 import { ArrowRight, CircleDot, FlaskConical, MessageCircle, Package, Sparkles, TrendingUp } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/arc/badge/badge'
 import { BarChart } from '@/components/arc/bar-chart/bar-chart'
 import { Button } from '@/components/arc/button/button'
-import { DonutChart } from '@/components/arc/donut-chart/donut-chart'
 import { Drawer, DrawerContent } from '@/components/arc/drawer/drawer'
 import { Gauge } from '@/components/arc/gauge/gauge'
-import { LineChart } from '@/components/arc/line-chart/line-chart'
 import { Progress } from '@/components/arc/progress/progress'
 import { SortableDataTable } from '@/components/arc/sortable-data-table/sortable-data-table'
 import { Sparkline } from '@/components/arc/sparkline/sparkline'
 import { Stepper } from '@/components/arc/stepper/stepper'
 import { Timeline } from '@/components/arc/timeline/timeline'
-import { UsageMeter } from '@/components/arc/usage-meter/usage-meter'
 import { AgentAvatar } from '@/components/agent/AgentAvatar'
 import { useAgentResolver } from '@/components/agent/use-agent'
 import { DecisionBadge } from '@/components/approvals/ApprovalActions'
@@ -26,6 +23,7 @@ import { money, relativeTime } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { useKrew, useWorkspace } from '@/store/krew'
 import { toast } from '@/store/toasts'
+import { TrackerWorkspace } from './tracker/TrackerWorkspace'
 
 function useModule() {
   const ws = useWorkspace()
@@ -138,86 +136,6 @@ export function LunaModule() {
           </DrawerContent>
         )}
       </Drawer>
-    </div>
-  )
-}
-
-/* ---------------- Tracker ---------------- */
-export function TrackerModule() {
-  const { ws, data } = useModule()
-  const t = data.tracker
-  const series = useMemo(
-    () =>
-      ws.daily.slice(-30).map((d, i) => {
-        const date = new Date(`${d.date}T00:00:00`)
-        return {
-          key: d.date,
-          label: date.toLocaleDateString('en', { month: 'short', day: 'numeric' }),
-          axisLabel: i % 5 === 0 ? date.toLocaleDateString('en', { month: 'short', day: 'numeric' }) : undefined,
-          values: { revenue: d.revenue, costs: Math.round(d.revenue * (1 - t.margin / 100)) },
-        }
-      }),
-    [ws.daily, t.margin],
-  )
-  return (
-    <div className="grid gap-4 lg:grid-cols-12">
-      <Panel title="Profit and loss" description="Last 7 days against the 7 days before" className="lg:col-span-7" bodyClassName="px-0 pb-2">
-        <table className="w-full text-[13.5px]">
-          <thead>
-            <tr className="border-b border-line-subtle text-left text-[12px] text-ink-3">
-              <th className="px-5 py-2 font-normal">Line</th>
-              <th className="px-5 py-2 text-right font-normal">This week</th>
-              <th className="hidden px-5 py-2 text-right font-normal sm:table-cell">Last week</th>
-              <th className="px-5 py-2 text-right font-normal">Change</th>
-            </tr>
-          </thead>
-          <tbody>
-            {t.pl.map((r) => {
-              const change = ((r.value - r.prev) / Math.abs(r.prev)) * 100
-              const total = r.line === 'Contribution'
-              const good = r.value >= 0 ? change >= 0 : change <= 0
-              return (
-                <tr key={r.line} className={cn('border-b border-line-subtle last:border-0', total && 'bg-panel-muted font-medium')}>
-                  <td className="px-5 py-2.5 text-ink">{r.line}</td>
-                  <td className="tabular px-5 py-2.5 text-right text-ink">{money(r.value)}</td>
-                  <td className="tabular hidden px-5 py-2.5 text-right text-ink-3 sm:table-cell">{money(r.prev)}</td>
-                  <td className={cn('tabular px-5 py-2.5 text-right', good ? 'text-good' : 'text-bad')}>
-                    {change >= 0 ? '+' : ''}
-                    {change.toFixed(1)}%
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </Panel>
-      <Panel title="Where the money goes" description="Costs, last 7 days" className="lg:col-span-5">
-        <DonutChart label="Costs" data={t.expenses} formatValue={(v) => money(v, { compact: true })} size={170} thickness={18} />
-      </Panel>
-      <Panel title="Revenue and costs" description="Daily, last 30 days" className="lg:col-span-12">
-        <LineChart
-          label="Revenue and costs"
-          data={series}
-          height={210}
-          formatValue={(v) => money(v)}
-          formatTick={(v) => `$${Math.round(v / 1000)}K`}
-          series={[
-            { key: 'revenue', label: 'Revenue' },
-            { key: 'costs', label: 'Total costs', dashed: true, area: false },
-          ]}
-        />
-      </Panel>
-      <Panel title="Contribution margin" description="Target 40%" className="lg:col-span-4">
-          <div className="flex justify-center">
-            <Gauge label="Margin" value={t.margin} detail={`${t.margin}% of revenue`} thresholds={[{ from: 0, tone: 'danger', label: 'Below target' }, { from: 40, tone: 'success', label: 'On target' }]} />
-          </div>
-      </Panel>
-      <Panel title="Marketing budget" description="October" className="lg:col-span-8">
-        <UsageMeter label="Marketing spend" unit="K" limit={t.budgetLimit} segments={t.budgetUsed} />
-      </Panel>
-      <div className="lg:col-span-12">
-        <SimNote />
-      </div>
     </div>
   )
 }
@@ -586,7 +504,7 @@ export function AgentModule({ agentId }: { agentId: string }) {
     case 'luna':
       return <LunaModule />
     case 'tracker':
-      return <TrackerModule />
+      return <TrackerWorkspace />
     case 'ivy':
       return <IvyModule />
     case 'store':

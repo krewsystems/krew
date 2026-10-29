@@ -60,3 +60,21 @@ export function greeting(date = new Date()): string {
 export function longDate(date = new Date()): string {
   return date.toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric' })
 }
+
+/** Currency with cents, for unit costs. */
+export function moneyExact(value: number): string {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)
+}
+
+/** "+4.2%" / "-1.0%", or "n/a" when there is nothing to compare. */
+export function signedPercent(value: number | null, decimals = 1): string {
+  if (value === null || !Number.isFinite(value)) return 'n/a'
+  return `${value >= 0 ? '+' : ''}${value.toFixed(decimals)}%`
+}
+
+/** "Sep 2" or "Sep 2, 2025" when the year differs from this year. */
+export function shortDate(iso: string): string {
+  const d = new Date(`${iso.slice(0, 10)}T00:00:00`)
+  const sameYear = d.getFullYear() === new Date().getFullYear()
+  return d.toLocaleDateString('en', sameYear ? { month: 'short', day: 'numeric' } : { month: 'short', day: 'numeric', year: 'numeric' })
+}

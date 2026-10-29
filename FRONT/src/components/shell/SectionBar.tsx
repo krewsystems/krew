@@ -149,7 +149,7 @@ function useSectionConfig(): SectionConfig | null {
     }
   }
 
-  const agentMatch = matchPath('/krew/:agentId/:tab?', pathname)
+  const agentMatch = matchPath('/krew/:agentId/:tab?/*', pathname)
   if (agentMatch?.params.agentId) {
     const id = agentMatch.params.agentId
     const a = resolveAgent(id, ws.hires)

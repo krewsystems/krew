@@ -1,4 +1,5 @@
 import { ago, ahead, buildDaily, D, defaultSettings, H } from './seed-utils'
+import { trackerSampleReports } from './tracker/reports'
 import type { WorkspaceData } from './types'
 
 /**
@@ -642,9 +643,11 @@ export function seedSahra(now = Date.now()): WorkspaceData {
       { id: 'tsk_thursday', agentId: 'manager', title: 'Prepare Thursday team summary', description: 'Summary of decisions and outcomes for Salma and Omar.', status: 'todo', priority: 'normal', dueAt: f(1 * D), createdAt: t(1 * D), createdBy: 'user' },
     ],
     reports: [
+      ...trackerSampleReports('sahra', now),
       {
         id: 'rep_daily_fin',
         agentId: 'tracker',
+        topic: 'performance',
         title: 'Daily financial report',
         kind: 'daily',
         period: 'Yesterday',
@@ -704,6 +707,7 @@ export function seedSahra(now = Date.now()): WorkspaceData {
       {
         id: 'rep_month',
         agentId: 'tracker',
+        topic: 'performance',
         title: 'September financial close',
         kind: 'monthly',
         period: 'September 2026',

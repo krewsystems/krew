@@ -1,4 +1,5 @@
 import { ago, ahead, buildDaily, D, defaultSettings, H } from './seed-utils'
+import { trackerSampleReports } from './tracker/reports'
 import type { WorkspaceData } from './types'
 
 /** Noor Skin: clean skincare from Dubai. A smaller, younger workspace with Ivy still in setup. */
@@ -71,7 +72,8 @@ export function seedNoor(now = Date.now()): WorkspaceData {
       { id: 'ntsk3', agentId: 'tracker', title: 'Dispute packaging invoice', description: 'Prepare the comparison with the original quote.', status: 'in_progress', priority: 'normal', dueAt: f(2 * D), createdAt: t(4 * D), createdBy: 'user' },
     ],
     reports: [
-      { id: 'nrep_launch', agentId: 'tracker', title: 'Launch week financial summary', kind: 'weekly', period: 'Oct 14 to Oct 20', createdAt: t(5 * H), summary: 'Revenue $14.2K, margin 58%, ahead of plan.', highlights: [{ label: 'Revenue', value: '$14.2K', change: '+31%', tone: 'good' }, { label: 'Margin', value: '58%', tone: 'good' }], sections: [{ id: 's', title: 'Summary', body: 'Serum launch drove 41% of revenue.' }] },
+      ...trackerSampleReports('noor', now),
+      { id: 'nrep_launch', agentId: 'tracker', topic: 'performance', title: 'Launch week financial summary', kind: 'weekly', period: 'Oct 14 to Oct 20', createdAt: t(5 * H), summary: 'Revenue $14.2K, margin 58%, ahead of plan.', highlights: [{ label: 'Revenue', value: '$14.2K', change: '+31%', tone: 'good' }, { label: 'Margin', value: '58%', tone: 'good' }], sections: [{ id: 's', title: 'Summary', body: 'Serum launch drove 41% of revenue.' }] },
       { id: 'nrep_sentiment', agentId: 'luna', title: 'Weekly customer sentiment', kind: 'weekly', period: 'Oct 13 to Oct 19', createdAt: t(26 * H), summary: 'Sentiment 84. Texture and scent praised.', highlights: [{ label: 'Sentiment', value: '84', change: '+5', tone: 'good' }], sections: [{ id: 's', title: 'Summary', body: 'Few complaints, mostly delivery timing outside Dubai.' }] },
       { id: 'nrep_ads', agentId: 'ads', title: 'Launch campaign report', kind: 'ad-hoc', period: 'First 7 days', createdAt: t(2 * D), summary: 'ROAS 3.1 on $4.2K spend.', highlights: [{ label: 'ROAS', value: '3.1', tone: 'good' }, { label: 'Spend', value: '$4.2K' }], sections: [{ id: 's', title: 'Summary', body: 'Saudi audiences were the most efficient.' }] },
     ],

@@ -352,10 +352,20 @@ export const useKrew = create<KrewState>()(
     {
       name: 'krew-demo',
       // Bump when the seed shape changes; older saves are reseeded so new demo content appears.
-      version: 2,
+      version: 3,
       migrate: (persisted, version) => {
         const state = persisted as Partial<KrewState>
-        return (version < 2 ? { ...state, workspaces: seedAll(), seededAt: nowIso() } : state) as KrewState
+        if (version < 2) return { ...state, workspaces: seedAll(), seededAt: nowIso() } as KrewState
+        // Version 3 added Tracker's finance reports and report topics. Merge them in without reseeding, so demo edits stay.
+        if (version < 3 && state.workspaces) {
+          const seed = seedAll()
+          for (const [id, w] of Object.entries(state.workspaces)) {
+            const fresh = seed[id]?.reports ?? []
+            const have = new Set(w.reports.map((r) => r.id))
+            w.reports = [...w.reports.map((r) => ({ ...r, topic: r.topic ?? fresh.find((f) => f.id === r.id)?.topic })), ...fresh.filter((r) => !have.has(r.id))]
+          }
+        }
+        return state as KrewState
       },
       storage: createJSONStorage(() => localStorage),
     },

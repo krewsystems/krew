@@ -19,6 +19,8 @@ const router = createBrowserRouter([
       { path: '/krew', element: <MyKrewPage /> },
       { path: '/krew/:agentId', element: <AgentWorkspacePage /> },
       { path: '/krew/:agentId/:tab', element: <AgentWorkspacePage /> },
+      { path: '/krew/:agentId/:tab/:section', element: <AgentWorkspacePage /> },
+      { path: '/krew/:agentId/:tab/:section/:itemId', element: <AgentWorkspacePage /> },
       { path: '/feed', element: <FeedPage /> },
       { path: '/messages', element: <MessagesPage /> },
       { path: '/messages/:conversationId', element: <MessagesPage /> },

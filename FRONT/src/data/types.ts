@@ -154,9 +154,13 @@ export interface ReportSection {
   bullets?: string[]
 }
 
+/** What a report covers. Optional: most agents' reports have none; Tracker's finance reports use it. */
+export type ReportTopic = 'performance' | 'profitability' | 'expenses' | 'projects' | 'costs'
+
 export interface Report {
   id: string
   agentId: AgentId
+  topic?: ReportTopic
   title: string
   kind: 'daily' | 'weekly' | 'monthly' | 'ad-hoc'
   period: string

@@ -1,6 +1,6 @@
 import { CalendarClock, Download, FileText, MessageCircle } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Breadcrumb } from '@/components/arc/breadcrumb/breadcrumb'
 import { Button } from '@/components/arc/button/button'
 import { ChipGroup } from '@/components/arc/chip-group/chip-group'
@@ -108,6 +108,9 @@ export function ReportDetailPage() {
   const resolve = useAgentResolver()
   const navigate = useNavigate()
   const report = ws.reports.find((r) => r.id === reportId)
+  // Opened from Finance → Reports: the breadcrumb leads back there instead of the library.
+  const from = (useLocation().state as { from?: string } | null)?.from
+  const back = from ? { label: 'Finance reports', href: from } : { label: 'Reports', href: '/reports' }
 
   if (!report) {
     return (
@@ -123,7 +126,7 @@ export function ReportDetailPage() {
   return (
     <Page wide>
       <div className="mb-5">
-        <Breadcrumb items={[{ label: 'Reports', href: '/reports' }, { label: report.title }]} />
+        <Breadcrumb items={[back, { label: report.title }]} />
       </div>
       <div className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_240px]">
         <article className="min-w-0 rounded-[var(--radius-surface)] border border-line bg-panel shadow-[var(--shadow-resting)]">

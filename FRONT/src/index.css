@@ -58,6 +58,10 @@
   --success-soft: oklch(52% 0.1 152 / 0.1);
   --warning-soft: oklch(64% 0.12 70 / 0.12);
   --danger-soft: oklch(55% 0.15 28 / 0.1);
+  /* Finance (Tracker): a cool accent for sales, muted green for profit. */
+  --sales: oklch(54% 0.06 245);
+  --sales-soft: oklch(54% 0.06 245 / 0.1);
+  --profit: oklch(50% 0.09 152);
 
   /* Monochrome chart series */
   --series-1: var(--ivory-11);
@@ -133,6 +137,9 @@
   --series-2: oklch(64% 0 0);
   --series-3: oklch(42% 0 0);
   --series-4: oklch(78% 0 0);
+  --sales: oklch(74% 0.07 245);
+  --sales-soft: oklch(74% 0.07 245 / 0.14);
+  --profit: oklch(74% 0.1 152);
   --agent-manager: oklch(92% 0 0);
   --default: oklch(26% 0 0);
   --surface-secondary: oklch(25% 0 0);
@@ -157,6 +164,9 @@
   --color-line-subtle: var(--border-subtle);
   --color-line-strong: var(--border-strong);
   --color-good: var(--success);
+  --color-sales: var(--sales);
+  --color-sales-soft: var(--sales-soft);
+  --color-profit: var(--profit);
   --color-warn: var(--warning);
   --color-bad: var(--danger);
   --color-good-soft: var(--success-soft);
@@ -216,6 +226,32 @@ h4 {
 
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* Fine paper grain for a few large editorial surfaces. Sits under content, never over it. */
+.grain {
+  position: relative;
+  isolation: isolate;
+}
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+[data-theme="dark"] .grain::before {
+  opacity: 0.08;
+  filter: invert(1);
+}
+
+/* Hatched fill for figures that are estimates rather than final (Tracker). Takes the text color. */
+.hatch-estimate {
+  background: repeating-linear-gradient(135deg, currentColor 0 1.5px, transparent 1.5px 4.5px);
+  box-shadow: inset 0 0 0 1px currentColor;
 }
 
 .no-scrollbar {
