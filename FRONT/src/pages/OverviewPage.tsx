@@ -1,11 +1,11 @@
 import { ArrowRight, FileText, MessagesSquare, Newspaper, Package, ShieldAlert, TrendingUp, UsersRound } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { DonutChart } from '@/components/arc/donut-chart/donut-chart'
 import { LineChart } from '@/components/arc/line-chart/line-chart'
 import SegmentedControl from '@/components/arc/segmented-control/segmented-control'
 import { AgentCard } from '@/components/agent/AgentCard'
 import { KpiTile } from '@/components/common/KpiTile'
+import { ConversationMix } from '@/components/luna/ConversationMix'
 import { Page, Panel } from '@/components/common/Panel'
 import { FeedPost } from '@/components/feed/FeedPost'
 import { ManagerNote } from '@/components/overview/ManagerNote'
@@ -75,23 +75,6 @@ function RevenuePanel() {
   )
 }
 
-function ConversationsPanel() {
-  const ws = useWorkspace()
-  const base = ws.kpis.conversations
-  const data = [
-    { key: 'pre', label: 'Pre-purchase questions', value: Math.round(base * 0.44) },
-    { key: 'status', label: 'Order status', value: Math.round(base * 0.27) },
-    { key: 'praise', label: 'Compliments', value: Math.round(base * 0.12) },
-    { key: 'complaints', label: 'Complaints', value: Math.round(base * 0.08) },
-    { key: 'returns', label: 'Returns & exchanges', value: Math.round(base * 0.06) },
-  ]
-  return (
-    <Panel title="Customer conversations" icon={<MessagesSquare />} description="Classified by Luna · last 7 days" href="/krew/luna/workspace" className="lg:col-span-4">
-      <DonutChart label="Conversations by topic" unit="conversations" data={data} size={180} thickness={20} />
-    </Panel>
-  )
-}
-
 export function OverviewPage() {
   const ws = useWorkspace()
   const k = ws.kpis
@@ -130,7 +113,7 @@ export function OverviewPage() {
 
       <div className="mt-4 grid gap-4 lg:grid-cols-12">
         <RevenuePanel />
-        <ConversationsPanel />
+        <ConversationMix href="/krew/luna/workspace/insights" className="lg:col-span-4" />
       </div>
 
       <section id="team" className="mt-9 scroll-mt-24">

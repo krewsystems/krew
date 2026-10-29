@@ -53,12 +53,12 @@ Agents will run on **Hermes Agent** (separate infrastructure). The backend's job
 | ID | Name | Role | Notes |
 |---|---|---|---|
 | `manager` | KREW Manager | Team coordination | Daily briefing, routes work between agents, follows up on approved actions. |
-| `luna` | Luna | Customer intelligence | Reads customer conversations (WhatsApp, Instagram, Facebook, email), classifies them, detects complaint spikes. **Never replies to customers.** Read-only. |
+| `luna` | Luna | Customer intelligence | Reads customer DMs (Instagram in the prototype; WhatsApp later), analyses each conversation, opens sales-opportunity and at-risk cases, finds patterns. **Never replies to customers.** Read-only. Workspace and contract: `docs/LUNA.md`. |
 | `tracker` | Tracker | Financial intelligence | Daily P&L, margin, costs, from Shopify and ad accounts. |
 | `ivy` | Ivy | Growth intelligence | Opportunities (bundles, pricing, audiences) with impact estimates. |
 | `store` | Store Agent | Shopify operations | Drafts product/collection changes; **publishes only after approval**. |
 | `ads` | Ads Agent | Advertising intelligence | Monitors Meta Ads, recommends budget/creative moves; **budget changes need approval**. |
-| `retention` | Retention Agent | Customer retention | Segments, recovery and win-back campaigns; **customer messages need approval**. |
+| `retention` | Retention Agent | Customer retention | V1: turns Luna's DM findings into personal follow-ups (recovery after a fixed problem, purchase follow-ups, unfinished conversations). No Shopify history in V1. Prepares messages; **never sends, customer messages need approval**. Workspace and contract: `docs/RETENTION.md`. |
 
 ### Marketplace agents (can be "hired")
 
@@ -165,6 +165,16 @@ Simulated in the UI. Real versions need OAuth/API connections, token refresh, an
 
 Components only read `useWorkspace()` and call store actions, so swapping the store internals for API calls should not require rebuilding screens.
 
+### Agent workspaces (each with its own living document)
+
+| Agent | Tab | Document | Separate store (localStorage) |
+|---|---|---|---|
+| Tracker | Finance | `docs/TRACKER.md`, `docs/TRACKER_BACKEND.md` | `store/tracker.ts` (`krew-tracker-demo`) |
+| Luna | Intelligence | `docs/LUNA.md` | `store/luna.ts` (`krew-luna-demo`): case status decisions |
+| Retention | Follow-ups | `docs/RETENTION.md` | `store/retention.ts` (`krew-retention-demo`): follow-up decisions |
+
+Each store follows KREW's "Reset demo data" through `seededAt`. Luna and Retention share one set of sample customers and conversations (`data/luna/mock.ts`); Retention references them by id. The Overview's "Customer conversations" card uses Luna's classified volume (`data/luna/volume.ts`), so it matches Luna's Insights.
+
 ### Store actions = the operations the backend must support
 
 | Area | Actions in `krew.ts` |
@@ -179,6 +189,8 @@ Components only read `useWorkspace()` and call store actions, so swapping the st
 | Brand | `updateBrand`, `upsertKnowledge`, `deleteKnowledge` |
 | Integrations | `setIntegrationStatus` |
 | Team | `inviteMember`, `updateMemberRole`, `removeMember` |
+
+Agent workspace stores add their own operations: Tracker (batches, projects, expenses; `docs/TRACKER_BACKEND.md`), Luna (`setCaseStatus`: opportunity and at-risk case statuses; `docs/LUNA.md` section 14) and Retention (edit, approve, mark sent, record outcome, dismiss, reopen a follow-up; `docs/RETENTION.md` section 10).
 
 UI-only state (theme, sidebar) stays in the browser.
 

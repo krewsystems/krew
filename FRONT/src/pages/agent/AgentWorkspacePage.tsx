@@ -9,6 +9,8 @@ import { AgentAvatar } from '@/components/agent/AgentAvatar'
 import { AgentSettingsForm } from '@/components/agent/AgentSettingsForm'
 import { AgentStatus } from '@/components/agent/AgentStatus'
 import { useAgentView } from '@/components/agent/use-agent'
+import { useLunaData, type LunaData } from '@/components/luna/use-luna'
+import { useRetentionData, type RetentionData } from '@/components/retention/use-retention'
 import { Page, Panel } from '@/components/common/Panel'
 import { FeedPost } from '@/components/feed/FeedPost'
 import { POST_TYPES } from '@/components/feed/post-meta'
@@ -16,7 +18,9 @@ import { ReportPreview } from '@/components/reports/ReportCard'
 import { SlidingPanel } from '@/components/ui/sliding-panel'
 import { moduleData } from '@/data/modules'
 import type { Metric, WorkspaceData } from '@/data/types'
-import { relativeTime } from '@/lib/format'
+import { conversationMix } from '@/data/luna/volume'
+import { number, relativeTime } from '@/lib/format'
+import { pulseStats, sentimentLabel } from '@/lib/luna'
 import { cn } from '@/lib/utils'
 import { useKrew, useWorkspace } from '@/store/krew'
 import { toast } from '@/store/toasts'
@@ -26,21 +30,27 @@ import { STATUS_LABEL, TasksBoard } from './TasksBoard'
 type Tab = 'overview' | 'workspace' | 'tasks' | 'reports' | 'history' | 'settings'
 const TABS: Tab[] = ['overview', 'workspace', 'tasks', 'reports', 'history', 'settings']
 
-function agentStats(agentId: string, ws: WorkspaceData): Metric[] {
+function agentStats(agentId: string, ws: WorkspaceData, luna: LunaData, retention: RetentionData): Metric[] {
   const d = moduleData(ws.id)
   const hire = ws.hires.find((h) => h.agentId === agentId)
   const tasksOpen = ws.tasks.filter((t) => t.agentId === agentId && t.status !== 'done').length
   const posts = ws.posts.filter((p) => p.agentId === agentId).length
   const head: Metric = hire ? { label: hire.kpi.label, value: hire.kpi.value, change: hire.kpi.change, tone: hire.kpi.trend === 'up' ? 'good' : hire.kpi.trend === 'down' ? 'bad' : 'neutral' } : { label: 'Status', value: '·' }
   switch (agentId) {
-    case 'luna':
-      return [head, { label: 'Sentiment score', value: String(d.luna.sentiment), change: '+3', tone: 'good' }, { label: 'Open complaints', value: String(ws.kpis.openIssues), change: ws.kpis.openIssuesChange, tone: ws.kpis.openIssuesChange.startsWith('+') ? 'bad' : 'good' }, { label: 'Insights this week', value: String(posts) }]
+    case 'luna': {
+      // Same records as Luna's workspace, so the header and the Intelligence tab always agree.
+      const p = pulseStats(luna)
+      return [{ label: 'Conversations this week', value: number(conversationMix(ws.id, 7).total) }, { label: 'Sales opportunities', value: String(p.openOpportunities), change: `${p.highIntent} high intent`, tone: 'neutral' }, { label: 'Needing attention', value: String(p.attention), change: p.attentionHigh ? `${p.attentionHigh} high` : undefined, tone: p.attentionHigh ? 'bad' : 'neutral' }, { label: 'Sentiment', value: sentimentLabel(p.sentiment.score) }]
+    }
     case 'tracker':
       return [head, { label: 'Revenue, 7 days', value: `$${(ws.kpis.revenue / 1000).toFixed(1)}K`, change: ws.kpis.revenueChange, tone: 'good' }, { label: 'Reports delivered', value: String(ws.reports.filter((r) => r.agentId === 'tracker').length) }, { label: 'Open tasks', value: String(tasksOpen) }]
     case 'ads':
       return [head, { label: 'Spend, 7 days', value: ws.id === 'noor' ? '$5.3K' : '$21.6K' }, { label: 'Ad sets watched', value: String(d.ads.campaigns.length) }, { label: 'Waiting for you', value: String(ws.approvals.filter((a) => a.agentId === 'ads' && a.status === 'pending').length) }]
-    case 'retention':
-      return [head, { label: 'At-risk customers', value: '312', change: '-4%', tone: 'good' }, { label: 'Campaigns drafted', value: String(d.retention.drafts.length) }, { label: 'Waiting for you', value: String(ws.approvals.filter((a) => a.agentId === 'retention' && a.status === 'pending').length) }]
+    case 'retention': {
+      // From Retention's desk, which reads Luna's records. No order history in V1.
+      const count = (l: string) => retention.items.filter((i) => i.lane === l).length
+      return [{ label: 'Ready now', value: String(count('ready')) }, { label: 'Waiting', value: String(count('waiting')) }, { label: 'Sent, awaiting reply', value: String(count('sent')) }, { label: 'Outcomes recorded', value: String(retention.items.filter((i) => i.rc.status === 'done').length) }]
+    }
     default:
       return [head, { label: 'Updates posted', value: String(posts) }, { label: 'Open tasks', value: String(tasksOpen) }, { label: 'Reports', value: String(ws.reports.filter((r) => r.agentId === agentId).length) }]
   }
@@ -51,6 +61,8 @@ export function AgentWorkspacePage() {
   const navigate = useNavigate()
   const ws = useWorkspace()
   const agent = useAgentView(agentId)
+  const luna = useLunaData()
+  const retention = useRetentionData()
   const setStatus = useKrew((s) => s.setHireStatus)
   const hire = agent.hire
   const active: Tab = TABS.includes(tab as Tab) ? (tab as Tab) : 'overview'
@@ -77,7 +89,7 @@ export function AgentWorkspacePage() {
     )
   }
 
-  const stats = agentStats(agentId, ws)
+  const stats = agentStats(agentId, ws, luna, retention)
 
   return (
     <Page wide>

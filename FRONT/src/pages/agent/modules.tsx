@@ -1,17 +1,13 @@
-import { ArrowRight, CircleDot, FlaskConical, MessageCircle, Package, Sparkles, TrendingUp } from 'lucide-react'
+import { ArrowRight, CircleDot, FlaskConical, Package, Sparkles, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/arc/badge/badge'
-import { BarChart } from '@/components/arc/bar-chart/bar-chart'
 import { Button } from '@/components/arc/button/button'
-import { Drawer, DrawerContent } from '@/components/arc/drawer/drawer'
-import { Gauge } from '@/components/arc/gauge/gauge'
 import { Progress } from '@/components/arc/progress/progress'
 import { SortableDataTable } from '@/components/arc/sortable-data-table/sortable-data-table'
 import { Sparkline } from '@/components/arc/sparkline/sparkline'
 import { Stepper } from '@/components/arc/stepper/stepper'
 import { Timeline } from '@/components/arc/timeline/timeline'
-import { AgentAvatar } from '@/components/agent/AgentAvatar'
 import { useAgentResolver } from '@/components/agent/use-agent'
 import { DecisionBadge } from '@/components/approvals/ApprovalActions'
 import { HatchedBars } from '@/components/common/HatchedBars'
@@ -19,10 +15,12 @@ import { Panel } from '@/components/common/Panel'
 import { getAgent } from '@/data/agents'
 import { moduleData } from '@/data/modules'
 import { ahead, D } from '@/data/seed-utils'
-import { money, relativeTime } from '@/lib/format'
+import { money } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import { useKrew, useWorkspace } from '@/store/krew'
 import { toast } from '@/store/toasts'
+import { LunaWorkspace } from './luna/LunaWorkspace'
+import { RetentionDesk } from './retention/RetentionDesk'
 import { TrackerWorkspace } from './tracker/TrackerWorkspace'
 
 function useModule() {
@@ -47,96 +45,6 @@ function Spark({ data, className }: { data: number[]; className?: string }) {
     <svg viewBox="0 0 100 22" preserveAspectRatio="none" className={cn('h-5 w-16 text-ink', className)} aria-hidden>
       <polyline points={pts} fill="none" stroke="currentColor" strokeWidth="1.3" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
     </svg>
-  )
-}
-
-/* ---------------- Luna ---------------- */
-export function LunaModule() {
-  const { data } = useModule()
-  const l = data.luna
-  const [open, setOpen] = useState<(typeof l.conversations)[number] | null>(null)
-  const navigate = useNavigate()
-  const trend = l.complaintTrend.map((v, i) => {
-    const d = new Date(Date.now() - (l.complaintTrend.length - 1 - i) * 86_400_000)
-    return { key: d.toISOString().slice(0, 10), label: d.toLocaleDateString('en', { weekday: 'short', month: 'short', day: 'numeric' }), axisLabel: d.toLocaleDateString('en', { weekday: 'narrow' }), value: v }
-  })
-
-  return (
-    <div className="grid gap-4 lg:grid-cols-12">
-      <Panel title="Customer sentiment" description="0 to 100 · from every conversation this week" className="lg:col-span-4">
-        <div className="flex justify-center py-2">
-          <Gauge label="Sentiment score" value={l.sentiment} detail="Up 3 points on last week" thresholds={[{ from: 0, tone: 'danger', label: 'Unhappy' }, { from: 50, tone: 'warning', label: 'Mixed' }, { from: 70, tone: 'accent', label: 'Healthy' }]} />
-        </div>
-      </Panel>
-      <Panel title="Conversation categories" description="This week against last week" className="lg:col-span-8">
-        <HatchedBars bars={l.topics} legend={['This week', 'Last week']} height={170} unit="" />
-      </Panel>
-      <Panel title="Complaints per day" description="Last 14 days" className="lg:col-span-6">
-        <BarChart data={trend} label="Complaints" period="Last 14 days" unit="complaints" height={170} averageLabel="Daily average" />
-      </Panel>
-      <Panel title="Complaints by product" description="Classified by Luna" className="lg:col-span-6" bodyClassName="overflow-x-auto px-2 pb-3">
-        <SortableDataTable
-          caption="Complaints by product"
-          rowKey="id"
-          rows={l.complaints}
-          defaultSort={{ key: 'count', direction: 'desc' }}
-          columns={[
-            { key: 'product', label: 'Product' },
-            { key: 'topic', label: 'Topic' },
-            { key: 'count', label: 'Count', numeric: true },
-            { key: 'change', label: 'Change', sortable: false, render: (v) => <span className={String(v).startsWith('+') ? 'text-bad' : String(v).startsWith('-') ? 'text-good' : 'text-ink-3'}>{String(v)}</span> },
-          ]}
-        />
-      </Panel>
-      <Panel title="Example conversations" description="Read-only. Luna monitors and reports, she does not reply to customers." className="lg:col-span-12" bodyClassName="px-3 pb-3">
-        <ul className="grid gap-2 md:grid-cols-2">
-          {l.conversations.map((c) => (
-            <li key={c.id}>
-              <button type="button" onClick={() => setOpen(c)} className="flex w-full items-start gap-3 rounded-[12px] border border-line-subtle bg-panel-muted p-3.5 text-left transition-colors hover:border-line-strong">
-                <span className={cn('mt-1 size-2 shrink-0 rounded-full', c.sentiment === 'negative' ? 'bg-bad' : c.sentiment === 'positive' ? 'bg-good' : 'bg-line-strong')} />
-                <div className="min-w-0 flex-1">
-                  <p className="flex items-center gap-2 text-[13px] text-ink">
-                    {c.customer}
-                    <span className="text-[12px] text-ink-3">· {c.channel} · {relativeTime(new Date(Date.now() - c.at * 60_000).toISOString())}</span>
-                  </p>
-                  <p className="mt-1 line-clamp-2 text-[13px] text-ink-2">“{c.lines[0].text}”</p>
-                </div>
-                <Badge size="sm">{c.topic}</Badge>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </Panel>
-      <Drawer open={!!open} onOpenChange={(o) => !o && setOpen(null)}>
-        {open && (
-          <DrawerContent title={`${open.customer} · ${open.channel}`} description={`${open.topic} · ${open.sentiment} sentiment`}>
-            <div className="flex flex-col gap-3">
-              {open.lines.map((line, i) => (
-                <div key={i} className={cn('max-w-[85%] rounded-[16px] px-3.5 py-2.5 text-[13.5px]', line.from === 'customer' ? 'self-start border border-line bg-panel text-ink' : 'self-end bg-sunken text-ink-2')}>
-                  <p className="mb-0.5 text-[11px] text-ink-3">{line.from === 'customer' ? open.customer : 'Your support team'}</p>
-                  {line.text}
-                </div>
-              ))}
-              <div className="mt-4 rounded-[12px] border border-line bg-panel-muted p-4">
-                <p className="flex items-center gap-2 text-[12.5px] text-ink-3">
-                  <AgentAvatar agentId="luna" size="xs" /> Luna’s read
-                </p>
-                <p className="mt-2 text-[13.5px] text-ink">
-                  {open.sentiment === 'negative'
-                    ? 'Frustrated, time sensitive. Linked to the courier delay pattern. Included in the recovery segment.'
-                    : open.sentiment === 'positive'
-                      ? 'Delighted. Mentions packaging. Counted toward this week’s praise themes.'
-                      : 'Pre-purchase question that the product page should answer. Shared with Store Agent.'}
-                </p>
-              </div>
-              <Button variant="secondary" onClick={() => navigate('/messages/luna')}>
-                <MessageCircle className="size-4" strokeWidth={1.6} /> Ask Luna about this
-              </Button>
-            </div>
-          </DrawerContent>
-        )}
-      </Drawer>
-    </div>
   )
 }
 
@@ -333,56 +241,6 @@ export function AdsModule() {
   )
 }
 
-/* ---------------- Retention ---------------- */
-export function RetentionModule() {
-  const { ws, data } = useModule()
-  const r = data.retention
-  if (r.segments.length === 0) return <GenericModule agentId="retention" />
-  return (
-    <div className="grid gap-4 lg:grid-cols-12">
-      <div className="grid gap-3 sm:grid-cols-2 lg:col-span-12 xl:grid-cols-4">
-        {r.segments.map((s) => (
-          <div key={s.id} className={cn('rounded-[var(--radius-panel)] border bg-panel p-5 shadow-[var(--shadow-resting)]', s.tone === 'bad' ? 'border-[color-mix(in_oklab,var(--danger)_30%,var(--border))]' : 'border-line')}>
-            <p className="text-[13px] text-ink-2">{s.name}</p>
-            <p className="tabular mt-2 text-[28px] font-light tracking-[-0.02em] text-ink">{s.size.toLocaleString()}</p>
-            <p className="mt-1 text-[12.5px] text-ink-3">
-              {s.value} · <span className={s.tone === 'bad' ? 'text-bad' : s.tone === 'good' ? 'text-good' : ''}>{s.trend}</span>
-            </p>
-            <p className="mt-3 border-t border-line-subtle pt-3 text-[12.5px] leading-snug text-ink-2">{s.description}</p>
-          </div>
-        ))}
-      </div>
-      <Panel title="Campaign drafts" description="Written in your brand voice. Nothing reaches a customer without your approval." className="lg:col-span-12" bodyClassName="px-3 pb-3">
-        <ul className="flex flex-col">
-          {r.drafts.map((d) => {
-            const approval = ws.approvals.find((a) => a.id === d.approvalId)
-            const status = approval ? (approval.status === 'approved' ? 'Scheduled' : approval.status === 'rejected' ? 'Draft' : d.status) : d.status
-            return (
-              <li key={d.id} className="flex flex-wrap items-center gap-3 rounded-[10px] px-2 py-3 hover:bg-sunken">
-                <div className="min-w-0 flex-1">
-                  <p className="text-[13.5px] text-ink">{d.name}</p>
-                  <p className="text-[12.5px] text-ink-3">
-                    {d.audience} · {d.channel}
-                    {d.result && ` · ${d.result}`}
-                  </p>
-                </div>
-                <Badge size="sm" tone={status === 'Sent' ? 'success' : status === 'Waiting for approval' ? 'warning' : status === 'Scheduled' ? 'info' : 'neutral'}>
-                  {status}
-                </Badge>
-                {approval?.status === 'pending' && (
-                  <Link to={`/approvals/${approval.id}`} className="text-[12.5px] text-ink-2 underline decoration-line-strong underline-offset-4 hover:text-ink">
-                    Review
-                  </Link>
-                )}
-              </li>
-            )
-          })}
-        </ul>
-      </Panel>
-    </div>
-  )
-}
-
 /* ---------------- Manager ---------------- */
 export function ManagerModule() {
   const ws = useWorkspace()
@@ -502,7 +360,7 @@ export function AgentModule({ agentId }: { agentId: string }) {
   if (hire?.status === 'setup') return <GenericModule agentId={agentId} />
   switch (agentId) {
     case 'luna':
-      return <LunaModule />
+      return <LunaWorkspace />
     case 'tracker':
       return <TrackerWorkspace />
     case 'ivy':
@@ -512,7 +370,7 @@ export function AgentModule({ agentId }: { agentId: string }) {
     case 'ads':
       return <AdsModule />
     case 'retention':
-      return <RetentionModule />
+      return <RetentionDesk />
     case 'manager':
       return <ManagerModule />
     default:

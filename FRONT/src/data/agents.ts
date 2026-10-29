@@ -165,25 +165,25 @@ export const AGENTS: AgentDefinition[] = [
     id: 'retention',
     name: 'Retention Agent',
     role: 'Customer retention',
-    tagline: 'Wins back unhappy customers and brings loyal ones back sooner.',
+    tagline: 'Turns what customers said in your DMs into the right follow-up.',
     description:
-      'Retention Agent segments customers by risk and value, prepares recovery and win-back campaigns, and drafts the messages. Nothing is sent to a customer without your approval.',
+      'Retention Agent takes the customers Luna flags in your DMs, decides who is worth a follow-up and when, and prepares a personal message from the conversation itself. Nothing is sent to a customer without your approval.',
     category: 'retention',
     accent: 'var(--agent-retention)',
     monogram: 'R',
     capabilities: [
-      { title: 'Risk segments', description: 'At-risk, lapsing and loyal segments refreshed daily.' },
-      { title: 'Recovery campaigns', description: 'Apology and make-good offers for affected customers.' },
-      { title: 'Win-back drafts', description: 'Message drafts in your brand voice, ready to approve.' },
+      { title: 'Recovery follow-ups', description: 'A personal check-in once a customer’s problem is fixed.' },
+      { title: 'Purchase follow-ups', description: 'Picks up conversations where a customer chose a product and went quiet.' },
+      { title: 'Personal drafts', description: 'Messages written from the actual conversation, ready to approve.' },
     ],
-    integrations: ['Shopify', 'WhatsApp'],
+    integrations: ['Instagram'],
     sampleOutputs: [
-      { title: 'Recovery campaign', body: '86 customers affected by the courier delay. Draft apology with a 15% code, expected to recover about $6.1K in repeat revenue.' },
+      { title: 'Recovery follow-up', body: 'Faisal’s parcel went missing and took a resend to arrive. It is fixed; a personal check-in is ready for your approval.' },
     ],
     availability: 'instant',
     defaultSchedule: 'Daily at 11:00',
     brandsUsing: 121,
-    workspaceLabel: 'Segments',
+    workspaceLabel: 'Follow-ups',
   },
   // Marketplace-only agents
   {
